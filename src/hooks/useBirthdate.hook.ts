@@ -1,5 +1,4 @@
-import { useSearchParams } from "next/navigation";
-import { useRouter } from "next/router";
+import { useSearchParams, useRouter } from "next/navigation";
 import React from "react";
 import { IWeek } from "@/components/Week";
 

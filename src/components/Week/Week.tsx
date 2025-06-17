@@ -1,6 +1,5 @@
 import debounce from "lodash.debounce";
-import { useSearchParams } from "next/navigation";
-import { useRouter } from "next/router";
+import { useRouter, useSearchParams } from "next/navigation";
 import React from "react";
 import Tooltip from "../Tooltip";
 import styles from "./week.module.css";
@@ -36,9 +35,11 @@ const MemoizedWeek = React.memo(function Week({ week }: { week: IWeek }) {
     const newParams = new URLSearchParams(Array.from(searchParams.entries()));
     const sundayKey = new Date(sunday).toISOString().split("T")[0];
 
-    newEvent
-      ? newParams.set(sundayKey, encodeURIComponent(newEvent))
-      : newParams.delete(sundayKey);
+    if (newEvent) {
+      newParams.set(sundayKey, encodeURIComponent(newEvent));
+    } else {
+      newParams.delete(sundayKey);
+    }
 
     router.push(`?${newParams.toString()}`);
   }, 100);
