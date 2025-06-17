@@ -2,18 +2,12 @@ import React from "react";
 import styles from "./instructions.module.css";
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 const Instructions = ({
-  birthDate,
-  handleBirthDateChange,
   accentColor,
   handleAccentColorChange,
 }: {
-  birthDate: string;
-
-  handleBirthDateChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   accentColor: string;
   handleAccentColorChange: (newAccentColor: string) => void;
 }) => {
-  const [bday, setBday] = React.useState(birthDate);
   const [showInstructions, setShowInstructions] = React.useState(false);
 
   return (
@@ -37,15 +31,7 @@ const Instructions = ({
       </p>
 
       <menu className={styles.controls}>
-        <label>
-          <VisuallyHidden.Root>Select your birthdate</VisuallyHidden.Root>
-          <input
-            type="date"
-            value={bday}
-            onChange={(e) => setBday(e.target.value)}
-            onBlur={handleBirthDateChange}
-          />
-        </label>
+
 
         <label>
           <VisuallyHidden.Root>Select an color</VisuallyHidden.Root>
@@ -76,8 +62,7 @@ const Instructions = ({
         <>
           <ol className={styles.instructions}>
             <li className={styles.step}>
-              Select your birthdate. Once you click or tab outside of the date
-              picker, the grid of weeks will update.
+              Your birthdate and life events are loaded from the events.yml file.
             </li>
             <li className={styles.step}>Select an accent color (optional).</li>
             <li className={styles.step}>

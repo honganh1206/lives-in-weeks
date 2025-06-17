@@ -1,6 +1,6 @@
-import { useSearchParams, useRouter } from "next/navigation";
 import React from "react";
 import { IWeek } from "@/components/Week";
+import yaml from "js-yaml";
 
 export const DECADE_LABELS = [
   "Childhood",
@@ -15,21 +15,46 @@ export const DECADE_LABELS = [
   "90s",
 ];
 
+interface EventData {
+  headline: string;
+  description: string;
+  based?: string;
+  doing?: string;
+  association?: string;
+}
+
+interface EventsData {
+  [date: string]: EventData[];
+}
+
 // Generate a nested array of weeks grouped by decade
-export function useBirthdate(bday: string | undefined) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+export function useEvent() {
+  const [eventsData, setEventsData] = React.useState<EventsData>({});
+  const [birthdate, setBirthdate] = React.useState<string>("");
 
-  const [birthdate, setBirthdate] = React.useState(bday ?? "2000-06-12"); // TODO: Harcoding here
+  // Load events from YAML file
+  React.useEffect(() => {
+    async function loadEvents() {
+      try {
+        const response = await fetch('/data/events.yml');
+        const yamlText = await response.text();
+        const data = yaml.load(yamlText) as EventsData;
+        setEventsData(data);
 
-  function handleBirthdateChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const newBday = event.target.value;
-    setBirthdate(newBday);
+        // Get the first date as birthdate
+        const dates = Object.keys(data).sort();
+        if (dates.length > 0) {
+          setBirthdate(dates[0]);
+        }
+      } catch (error) {
+        console.error('Error loading events:', error);
+        // Fallback to default birthdate
+        setBirthdate("2000-06-12");
+      }
+    }
 
-    const newParams = new URLSearchParams(Array.from(searchParams.entries()));
-    newParams.set("birthdate", newBday);
-    router.push(`?${newParams.toString()}`);
-  }
+    loadEvents();
+  }, []);
 
   // Generate a nested array of weeks grouped by decades
   // Only when we update the birthdate will we trigger a re-render
@@ -72,12 +97,16 @@ export function useBirthdate(bday: string | undefined) {
           ? `${year - birthdateUTC.getUTCFullYear()} in ${year}`
           : "";
 
-        // Fill the week events
+        // Fill the week events from YAML data only
         const weekKey = new Date(sunday).toISOString().split("T")[0];
-        const weekEvent = searchParams.get(weekKey);
-        const lifeEvent = weekEvent
-          ? decodeURIComponent(weekEvent)
-          : birthdayEvent;
+
+        // Check if there's an event from YAML for this date
+        const yamlEvent = eventsData[weekKey];
+        const yamlEventText = yamlEvent && yamlEvent.length > 0
+          ? yamlEvent[0].headline
+          : "";
+
+        const lifeEvent = yamlEventText || birthdayEvent;
 
         decadeWeeks.push({
           sunday: sunday.toUTCString(),
@@ -93,7 +122,7 @@ export function useBirthdate(bday: string | undefined) {
     }
 
     return tenDecades;
-  }, [searchParams, birthdate]);
+  }, [birthdate, eventsData]);
 
-  return { birthdate, handleBirthdateChange, decades };
+  return { birthdate, decades, eventsData };
 }

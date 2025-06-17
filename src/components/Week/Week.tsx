@@ -1,5 +1,3 @@
-import debounce from "lodash.debounce";
-import { useRouter, useSearchParams } from "next/navigation";
 import React from "react";
 import Tooltip from "../Tooltip";
 import styles from "./week.module.css";
@@ -20,61 +18,32 @@ export interface IWeek {
 }
 
 // Skip re-rendering when props are unchanged with memo
-const MemoizedWeek = React.memo(function Week({ week }: { week: IWeek }) {
-  // Object de-structuring with aliasing, we bind the lifeEvent with a local var
-  const { sunday, saturday, lifeEvent: existingLifeEvent } = week;
-
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const [lifeEvent, setLifeEvent] = React.useState(existingLifeEvent);
-
-  // Update the URL based on a newEvent
-  // 100ms to prevent excessive calls to router.push e.g., during rapid typing
-  const handleUrlUpdate = debounce((newEvent: string) => {
-    const newParams = new URLSearchParams(Array.from(searchParams.entries()));
-    const sundayKey = new Date(sunday).toISOString().split("T")[0];
-
-    if (newEvent) {
-      newParams.set(sundayKey, encodeURIComponent(newEvent));
-    } else {
-      newParams.delete(sundayKey);
-    }
-
-    router.push(`?${newParams.toString()}`);
-  }, 100);
-
-  function handleLifeEventChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const newEvent = e.target.value;
-    setLifeEvent(newEvent);
-    handleUrlUpdate(newEvent);
-  }
+const Week = React.memo(function Week({ week }: { week: IWeek }) {
+  const { sunday, saturday, lifeEvent } = week;
 
   // Reference a value that is not needed for rendering
   // Changing it does not trigger a re-render
   // Store information between re-renders
-  const inputRef = React.useRef<HTMLInputElement>(null);
+  const weekRef = React.useRef<HTMLDivElement>(null);
 
-  // No way to set dynamic width for input
+  // No way to set dynamic width for div
   // One ch unit is the size of a 0 char
   React.useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.style.width = `${Math.max(1, lifeEvent.length + 2)}ch`;
+    if (weekRef.current) {
+      weekRef.current.style.width = `${Math.max(16, lifeEvent.length * 8 + 16)}px`;
     }
   }, [lifeEvent]);
 
   return (
     <Tooltip
       trigger={
-        <input
-          ref={inputRef}
-          type="text"
+        <div
+          ref={weekRef}
           className={styles.week}
-          value={lifeEvent}
           data-empty={!lifeEvent}
-          onChange={handleLifeEventChange}
-          maxLength={100}
-        ></input>
+        >
+          {lifeEvent}
+        </div>
       }
     >
       <p>
@@ -84,4 +53,4 @@ const MemoizedWeek = React.memo(function Week({ week }: { week: IWeek }) {
   );
 });
 
-export default MemoizedWeek;
+export default Week;

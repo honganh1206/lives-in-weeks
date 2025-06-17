@@ -1,0 +1,44 @@
+#
+# The first event should be birth.
+# The date should match your actual birthdate.
+#
+"2000-06-12":
+    - headline: "🐣 I was born"
+      description: "I entered the world on this day, beginning my journey through life's weeks."
+      based: ""
+      doing: "I was tiny"
+
+"2005-09-01":
+    - headline: "🖍️ Started school"
+      description: "First day of elementary school - the beginning of my formal education."
+      based: ""
+      doing: "Student"
+      association: "Elementary School"
+
+"2013-09-01":
+    - headline: "📚 High school"
+      description: "Started high school, a new chapter of learning and growth."
+      based: ""
+      doing: "High school student"
+      association: "High School"
+
+"2017-09-01":
+    - headline: "🏫 College years"
+      description: "Started university, pursuing higher education and independence."
+      based: ""
+      doing: "College student"
+      association: "University"
+
+"2021-06-15":
+    - headline: "🎓 Graduated"
+      description: "Completed my degree and stepped into the professional world."
+      based: ""
+      doing: "Graduate"
+      association: ""
+
+"2021-07-01":
+    - headline: "💼 First job"
+      description: "Started my first professional role, beginning my career journey."
+      based: ""
+      doing: "Working professional"
+      association: "First Company"
