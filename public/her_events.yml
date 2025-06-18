@@ -1,0 +1,9 @@
+#
+# The first event should be birth.
+# The date should match the actual birthdate for Person 2.
+#
+"2000-03-15":
+    - headline: "🐣 I was born"
+      description: "I entered the world on this day, beginning my journey through life's weeks."
+      based: ""
+      doing: "I was tiny"

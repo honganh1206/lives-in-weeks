@@ -1,6 +1,6 @@
-import React from "react";
 import { IWeek } from "@/components/Week";
 import yaml from "js-yaml";
+import React from "react";
 
 export const DECADE_LABELS = [
   "Childhood",
@@ -28,15 +28,16 @@ interface EventsData {
 }
 
 // Generate a nested array of weeks grouped by decade
-export function useEvent() {
+export function useEvent(eventsFile: string, mergeDate?: string) {
   const [eventsData, setEventsData] = React.useState<EventsData>({});
+  const [sharedEventsData, setSharedEventsData] = React.useState<EventsData>({});
   const [birthdate, setBirthdate] = React.useState<string>("");
 
   // Load events from YAML file
   React.useEffect(() => {
     async function loadEvents() {
       try {
-        const response = await fetch('/data/events.yml');
+        const response = await fetch(eventsFile);
         const yamlText = await response.text();
         const data = yaml.load(yamlText) as EventsData;
         setEventsData(data);
@@ -48,13 +49,25 @@ export function useEvent() {
         }
       } catch (error) {
         console.error('Error loading events:', error);
-        // Fallback to default birthdate
-        setBirthdate("2000-06-12");
+      }
+    }
+
+    async function loadSharedEvents() {
+      if (mergeDate) {
+        try {
+          const response = await fetch('/our_events.yml');
+          const yamlText = await response.text();
+          const data = yaml.load(yamlText) as EventsData;
+          setSharedEventsData(data);
+        } catch (error) {
+          console.error('Error loading shared events:', error);
+        }
       }
     }
 
     loadEvents();
-  }, []);
+    loadSharedEvents();
+  }, [eventsFile, mergeDate]);
 
   // Generate a nested array of weeks grouped by decades
   // Only when we update the birthdate will we trigger a re-render
@@ -97,14 +110,29 @@ export function useEvent() {
           ? `${year - birthdateUTC.getUTCFullYear()} in ${year}`
           : "";
 
-        // Fill the week events from YAML data only
-        const weekKey = new Date(sunday).toISOString().split("T")[0];
-
         // Check if there's an event from YAML for this date
-        const yamlEvent = eventsData[weekKey];
-        const yamlEventText = yamlEvent && yamlEvent.length > 0
-          ? yamlEvent[0].headline
-          : "";
+        // Use shared events if we're past the merge date
+        const mergeDateObj = mergeDate ? new Date(mergeDate) : null;
+        const currentWeekDate = new Date(sunday);
+        const useSharedEvents = mergeDateObj && currentWeekDate >= mergeDateObj;
+        const activeEventsData = useSharedEvents ? sharedEventsData : eventsData;
+        // Get all events that fall within this week (Sunday to Saturday)
+        const nextSunday = new Date(sunday);
+        nextSunday.setUTCDate(nextSunday.getUTCDate() + 7);
+
+        const yamlEvents: EventData[] = [];
+        Object.keys(activeEventsData).forEach(dateKey => {
+          const eventDate = new Date(dateKey);
+          if (eventDate >= sunday && eventDate < nextSunday) {
+            yamlEvents.push(...activeEventsData[dateKey]);
+          }
+        });
+
+        // Iterate through each event and combine their headlines
+        let yamlEventText = "";
+        if (yamlEvents && yamlEvents.length > 0) {
+          yamlEventText = yamlEvents.map(event => event.headline).join(", ");
+        }
 
         const lifeEvent = yamlEventText || birthdayEvent;
 
@@ -122,7 +150,7 @@ export function useEvent() {
     }
 
     return tenDecades;
-  }, [birthdate, eventsData]);
+  }, [birthdate, eventsData, sharedEventsData, mergeDate]);
 
-  return { birthdate, decades, eventsData };
+  return { birthdate, decades };
 }

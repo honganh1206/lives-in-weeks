@@ -30,7 +30,7 @@ const Week = React.memo(function Week({ week }: { week: IWeek }) {
   // One ch unit is the size of a 0 char
   React.useEffect(() => {
     if (weekRef.current) {
-      weekRef.current.style.width = `${Math.max(16, lifeEvent.length * 8 + 16)}px`;
+      weekRef.current.style.width = `${Math.max(1, lifeEvent.length + 2)}ch`;
     }
   }, [lifeEvent]);
 

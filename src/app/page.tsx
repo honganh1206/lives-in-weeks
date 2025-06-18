@@ -16,8 +16,27 @@ export default function Home({
   searchParams: { [key: string]: string | undefined };
 }) {
   const { accent } = searchParams;
-  const { decades } = useEvent()
+  const mergeDate = "2019-10-01"; // When lives became intertwined
+  const { decades: myDecades } = useEvent('/my_events.yml', mergeDate)
+  const { decades: herDecades } = useEvent('/her_events.yml', mergeDate)
+  // const { decades: ourDecades } = useEvent('/shared_events.yml', mergeDate)
   const { accentColor, handleAccentColorChange } = useAccentColor(accent)
+
+  // Helper function to check if a decade contains the merge date or is after it
+  const isDecadeAfterMerge = (decade: any[]) => {
+    if (decade.length === 0) return false;
+    const lastWeek = new Date(decade[decade.length - 1].sunday);
+    const merge = new Date(mergeDate);
+    return lastWeek >= merge;
+  }
+
+  const isDecadeContainsMerge = (decade: any[]) => {
+    if (decade.length === 0) return false;
+    const firstWeek = new Date(decade[0].sunday);
+    const lastWeek = new Date(decade[decade.length - 1].sunday);
+    const merge = new Date(mergeDate);
+    return firstWeek <= merge && lastWeek >= merge;
+  }
 
   return (
     <Suspense>
@@ -30,22 +49,71 @@ export default function Home({
             accentColor={accentColor}
             handleAccentColorChange={handleAccentColorChange}
           />
-          {decades.map((decade, index) => (
-            <React.Fragment key={DECADE_LABELS[index]}>
-              <Heading Tag="h2" urlKey={`decade-${index}`}>
-                {DECADE_LABELS[index]}
-              </Heading>
-              <section className={styles.decade}>
-                {decade.map((week) =>
-                  new Date(week.sunday) < new Date() ? (
-                    <PastWeek key={week.sunday} week={week} />
+          <div>
+            {myDecades.map((myDecade, index) => {
+              const herDecade = herDecades[index] || [];
+              const decadeAfterMerge = isDecadeAfterMerge(myDecade);
+              const decadeContainsMerge = isDecadeContainsMerge(myDecade);
+
+              return (
+                <React.Fragment key={`decade-${index}`}>
+                  <Heading Tag="h2" urlKey={`decade-${index}`}>
+                    {DECADE_LABELS[index]}
+                  </Heading>
+
+                  {decadeAfterMerge && !decadeContainsMerge ? (
+                    // Show merged timeline for decades completely after merge
+                    <div className={styles.mergedSection}>
+                      <Heading Tag="h2" urlKey="merged-title">
+                        Our lives intertwined
+                      </Heading>
+                      <section className={styles.decade}>
+                        {myDecade.map((week) =>
+                          new Date(week.sunday) < new Date() ? (
+                            <PastWeek key={week.sunday} week={week} />
+                          ) : (
+                            <FutureWeek key={week.sunday} week={week} />
+                          )
+                        )}
+                      </section>
+                    </div>
                   ) : (
-                    <FutureWeek key={week.sunday} week={week} />
-                  )
-                )}
-              </section>
-            </React.Fragment>
-          ))}
+                    // Show separate timelines for decades before merge or containing merge
+                    <div className={styles.peopleContainer}>
+                      <div className={styles.personSection}>
+                        <Heading Tag="h2" urlKey="me-title">
+                          Me
+                        </Heading>
+                        <section className={styles.decade}>
+                          {myDecade.map((week) =>
+                            new Date(week.sunday) < new Date() ? (
+                              <PastWeek key={week.sunday} week={week} />
+                            ) : (
+                              <FutureWeek key={week.sunday} week={week} />
+                            )
+                          )}
+                        </section>
+                      </div>
+                      <div className={styles.personSection}>
+                        <Heading Tag="h2" urlKey="her-title">
+                          Her
+                        </Heading>
+                        <section className={styles.decade}>
+                          {herDecade.map((week) =>
+                            new Date(week.sunday) < new Date() ? (
+                              <PastWeek key={week.sunday} week={week} />
+                            ) : (
+                              <FutureWeek key={week.sunday} week={week} />
+                            )
+                          )}
+                        </section>
+                      </div>
+                    </div>
+                  )}
+                </React.Fragment>
+              );
+            })}
+          </div>
         </main>
       </TooltipProvider>
     </Suspense>
