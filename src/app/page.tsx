@@ -7,19 +7,36 @@ import PastWeek from "@/components/Week/Week";
 import { useAccentColor } from "@/hooks/useAccentColor.hook";
 import { DECADE_LABELS, useEvent } from "@/hooks/useEvent.hook";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
-import React, { Suspense } from 'react';
+import yaml from "js-yaml";
+import React, { Suspense, useEffect, useState } from 'react';
 import styles from "./page.module.css";
 
 export default function Home({
   searchParams,
-}: {
+}: Readonly<{
   searchParams: { [key: string]: string | undefined };
-}) {
+}>) {
   const { accent } = searchParams;
   const mergeDate = "2019-10-01"; // When lives became intertwined
-  const { decades: myDecades } = useEvent('/my_events.yml', mergeDate)
-  const { decades: herDecades } = useEvent('/her_events.yml', mergeDate)
-  // const { decades: ourDecades } = useEvent('/shared_events.yml', mergeDate)
+  const [sharedEventsData, setSharedEventsData] = useState<any>({});
+
+  // Load shared events data
+  useEffect(() => {
+    async function loadSharedEvents() {
+      try {
+        const response = await fetch('/our_events.yml');
+        const yamlText = await response.text();
+        const data = yaml.load(yamlText);
+        setSharedEventsData(data);
+      } catch (error) {
+        console.error('Error loading shared events:', error);
+      }
+    }
+    loadSharedEvents();
+  }, []);
+
+  const { decades: myDecades } = useEvent('/my_events.yml', mergeDate, sharedEventsData)
+  const { decades: herDecades } = useEvent('/her_events.yml', mergeDate, sharedEventsData)
   const { accentColor, handleAccentColorChange } = useAccentColor(accent)
 
   // Helper function to check if a decade contains the merge date or is after it

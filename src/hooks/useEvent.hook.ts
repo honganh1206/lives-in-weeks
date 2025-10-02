@@ -28,9 +28,8 @@ interface EventsData {
 }
 
 // Generate a nested array of weeks grouped by decade
-export function useEvent(eventsFile: string, mergeDate?: string) {
+export function useEvent(eventsFile: string, mergeDate?: string, sharedEventsData?: EventsData) {
   const [eventsData, setEventsData] = React.useState<EventsData>({});
-  const [sharedEventsData, setSharedEventsData] = React.useState<EventsData>({});
   const [birthdate, setBirthdate] = React.useState<string>("");
 
   // Load events from YAML file
@@ -52,22 +51,8 @@ export function useEvent(eventsFile: string, mergeDate?: string) {
       }
     }
 
-    async function loadSharedEvents() {
-      if (mergeDate) {
-        try {
-          const response = await fetch('/our_events.yml');
-          const yamlText = await response.text();
-          const data = yaml.load(yamlText) as EventsData;
-          setSharedEventsData(data);
-        } catch (error) {
-          console.error('Error loading shared events:', error);
-        }
-      }
-    }
-
     loadEvents();
-    loadSharedEvents();
-  }, [eventsFile, mergeDate]);
+  }, [eventsFile]);
 
   // Generate a nested array of weeks grouped by decades
   // Only when we update the birthdate will we trigger a re-render
@@ -114,7 +99,7 @@ export function useEvent(eventsFile: string, mergeDate?: string) {
         // Use shared events if we're past the merge date
         const mergeDateObj = mergeDate ? new Date(mergeDate) : null;
         const currentWeekDate = new Date(sunday);
-        const useSharedEvents = mergeDateObj && currentWeekDate >= mergeDateObj;
+        const useSharedEvents = mergeDateObj && currentWeekDate >= mergeDateObj && sharedEventsData;
         const activeEventsData = useSharedEvents ? sharedEventsData : eventsData;
         // Get all events that fall within this week (Sunday to Saturday)
         const nextSunday = new Date(sunday);
