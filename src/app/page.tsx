@@ -8,15 +8,13 @@ import { useAccentColor } from "@/hooks/useAccentColor.hook";
 import { DECADE_LABELS, useEvent } from "@/hooks/useEvent.hook";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import yaml from "js-yaml";
+import { useSearchParams } from "next/navigation";
 import React, { Suspense, useEffect, useState } from 'react';
 import styles from "./page.module.css";
 
-export default function Home({
-  searchParams,
-}: Readonly<{
-  searchParams: { [key: string]: string | undefined };
-}>) {
-  const { accent } = searchParams;
+function HomeContent() {
+  const searchParams = useSearchParams();
+  const accent = searchParams.get('accent') ?? undefined;
   const mergeDate = "2019-10-01"; // When lives became intertwined
   const [sharedEventsData, setSharedEventsData] = useState<any>({});
 
@@ -56,8 +54,7 @@ export default function Home({
   }
 
   return (
-    <Suspense>
-      <TooltipProvider>
+    <TooltipProvider>
         <main className={styles.main}>
           <Heading Tag="h1" urlKey="title">
             Our lives in weeks
@@ -133,6 +130,13 @@ export default function Home({
           </div>
         </main>
       </TooltipProvider>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense>
+      <HomeContent />
     </Suspense>
   );
 }
