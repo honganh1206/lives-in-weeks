@@ -7,6 +7,7 @@ import PastWeek from "@/components/Week/Week";
 import { useAccentColor } from "@/hooks/useAccentColor.hook";
 import { DECADE_LABELS, useEvent } from "@/hooks/useEvent.hook";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
+import { withBasePath } from "@/utils/basePath";
 import yaml from "js-yaml";
 import { useSearchParams } from "next/navigation";
 import React, { Suspense, useEffect, useState } from 'react';
@@ -22,7 +23,7 @@ function HomeContent() {
   useEffect(() => {
     async function loadSharedEvents() {
       try {
-        const response = await fetch('/our_events.yml');
+        const response = await fetch(withBasePath('/our_events.yml'));
         const yamlText = await response.text();
         const data = yaml.load(yamlText);
         setSharedEventsData(data);

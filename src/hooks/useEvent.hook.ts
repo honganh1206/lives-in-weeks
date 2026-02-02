@@ -1,4 +1,5 @@
 import { IWeek } from "@/components/Week";
+import { withBasePath } from "@/utils/basePath";
 import yaml from "js-yaml";
 import React from "react";
 
@@ -36,7 +37,7 @@ export function useEvent(eventsFile: string, mergeDate?: string, sharedEventsDat
   React.useEffect(() => {
     async function loadEvents() {
       try {
-        const response = await fetch(eventsFile);
+        const response = await fetch(withBasePath(eventsFile));
         const yamlText = await response.text();
         const data = yaml.load(yamlText) as EventsData;
         setEventsData(data);
