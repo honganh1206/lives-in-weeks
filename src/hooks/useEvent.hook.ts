@@ -116,8 +116,10 @@ export function useEvent(eventsFile: string, mergeDate?: string, sharedEventsDat
 
         // Iterate through each event and combine their headlines
         let yamlEventText = "";
+        let yamlEventDescription = "";
         if (yamlEvents && yamlEvents.length > 0) {
           yamlEventText = yamlEvents.map(event => event.headline).join(", ");
+          yamlEventDescription = yamlEvents.map(event => event.description).filter(Boolean).join(", ");
         }
 
         const lifeEvent = yamlEventText || birthdayEvent;
@@ -126,6 +128,7 @@ export function useEvent(eventsFile: string, mergeDate?: string, sharedEventsDat
           sunday: sunday.toUTCString(),
           saturday: saturday.toUTCString(),
           lifeEvent,
+          lifeEventDescription: yamlEventDescription,
         });
 
         sunday.setUTCDate(sunday.getUTCDate() + 7);

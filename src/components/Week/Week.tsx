@@ -15,11 +15,12 @@ export interface IWeek {
   sunday: string;
   saturday: string;
   lifeEvent: string;
+  lifeEventDescription: string;
 }
 
 // Skip re-rendering when props are unchanged with memo
 const Week = React.memo(function Week({ week }: { week: IWeek }) {
-  const { sunday, saturday, lifeEvent } = week;
+  const { sunday, saturday, lifeEvent, lifeEventDescription } = week;
 
   // Reference a value that is not needed for rendering
   // Changing it does not trigger a re-render
@@ -48,6 +49,7 @@ const Week = React.memo(function Week({ week }: { week: IWeek }) {
     >
       <p>
         {formatDate(sunday)} to {formatDate(saturday, true)}
+        {lifeEventDescription && ` - ${lifeEventDescription}`}
       </p>
     </Tooltip>
   );
