@@ -22,6 +22,16 @@
       description: "Mom said some monkey stole chips from me, ouch"
       based: ""
       doing: "I was tiny"
+"2007-08-27":
+    - headline: "Move to the US"
+      description: "I'll be fluent in English in no time they say"
+      based: ""
+      doing: "I was tiny"
+"2010-08-25":
+    - headline: "Move back to Vietnam"
+      description: "The Vnese subjects are so confusing sos"
+      based: ""
+      doing: "I was tiny"
 "2015-09-05":
     - headline: "Got into high school - Hanoi Amsterdam High School"
       description: "And I study Russian :)"
